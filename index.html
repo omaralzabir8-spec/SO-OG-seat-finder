@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bangladesh Bank Seat Finder</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #f0f2f5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .topbar {
+    width: 100%; max-width: 640px;
+    background: #003d1f;
+    border-radius: 12px 12px 0 0;
+    padding: 10px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .topbar-left { display: flex; align-items: center; gap: 10px; }
+  .bb-seal {
+    width: 38px; height: 38px; background: #fff;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px;
+  }
+  .topbar-title { color: #fff; font-size: 13px; font-weight: 600; letter-spacing: 0.4px; }
+  .topbar-subtitle { color: #86b89a; font-size: 11px; margin-top: 1px; }
+  .topbar-badge {
+    background: #c8a84b; color: #1a1a1a;
+    font-size: 10px; font-weight: 700; padding: 3px 9px;
+    border-radius: 20px; letter-spacing: 0.5px; text-transform: uppercase;
+  }
+  .card {
+    background: #fff; width: 100%; max-width: 640px;
+    padding: 32px 36px 28px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  }
+  .hero { text-align: center; margin-bottom: 24px; padding-bottom: 22px; border-bottom: 1px solid #e8e8e8; }
+  .hero h1 { font-size: 21px; font-weight: 700; color: #0d1f14; letter-spacing: -0.3px; margin-bottom: 5px; }
+  .hero p { font-size: 13px; color: #666; }
+
+  /* Exam selector tabs */
+  .exam-tabs { display: flex; gap: 10px; margin-bottom: 22px; }
+  .tab-btn {
+    flex: 1; padding: 11px 10px;
+    border: 1.5px solid #d0d0d0;
+    background: #fafafa; border-radius: 9px;
+    font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600;
+    color: #555; cursor: pointer; transition: all 0.18s; text-align: center;
+    line-height: 1.45;
+  }
+  .tab-btn:hover { border-color: #003d1f; color: #003d1f; background: #f0f7f3; }
+  .tab-btn.active { border-color: #003d1f; background: #003d1f; color: #fff; }
+  .tab-btn .tab-id { font-size: 10px; font-weight: 500; opacity: 0.75; display: block; margin-top: 1px; }
+
+  /* Meta strip */
+  .meta-strip {
+    display: flex; border: 1px solid #e0e0e0;
+    border-radius: 10px; overflow: hidden; margin-bottom: 24px;
+  }
+  .meta-item {
+    flex: 1; padding: 11px 14px;
+    border-right: 1px solid #e0e0e0; background: #fafafa;
+  }
+  .meta-item:last-child { border-right: none; }
+  .meta-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: #999; margin-bottom: 3px; }
+  .meta-value { font-size: 13px; font-weight: 600; color: #1a1a1a; }
+
+  /* Input */
+  .input-section label { display: block; font-size: 13px; font-weight: 600; color: #333; margin-bottom: 8px; }
+  .input-row { display: flex; gap: 10px; }
+  input[type="number"] {
+    flex: 1; padding: 13px 16px;
+    border: 1.5px solid #d0d0d0; border-radius: 8px;
+    font-size: 16px; font-family: 'Inter', sans-serif; font-weight: 500;
+    color: #1a1a1a; letter-spacing: 2px; outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s; background: #fff;
+  }
+  input[type="number"]:focus { border-color: #003d1f; box-shadow: 0 0 0 3px rgba(0,61,31,0.08); }
+  input[type="number"]::placeholder { color: #bbb; letter-spacing: 1px; }
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+  .btn {
+    padding: 13px 26px; background: #003d1f; color: #fff;
+    border: none; border-radius: 8px; font-size: 14px; font-weight: 600;
+    font-family: 'Inter', sans-serif; cursor: pointer;
+    transition: background 0.2s, transform 0.1s; white-space: nowrap;
+  }
+  .btn:hover { background: #00521a; }
+  .btn:active { transform: scale(0.98); }
+
+  /* Result */
+  .result { margin-top: 22px; display: none; animation: fadeIn 0.25s ease; }
+  @keyframes fadeIn { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform: translateY(0); } }
+  .result-card { border-radius: 10px; border: 1.5px solid; overflow: hidden; }
+  .result-card.found { border-color: #003d1f; }
+  .result-card.not-found { border-color: #c0392b; }
+  .result-header {
+    padding: 11px 20px; display: flex; align-items: center; gap: 8px;
+    font-size: 11.5px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase;
+  }
+  .result-header.found { background: #003d1f; color: #fff; }
+  .result-header.not-found { background: #c0392b; color: #fff; }
+  .result-dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.5); }
+  .result-body { padding: 22px 24px; background: #fff; }
+  .center-name { font-size: 17px; font-weight: 700; color: #0d1f14; margin-bottom: 5px; line-height: 1.35; }
+  .center-address { font-size: 13px; color: #666; margin-bottom: 18px; display: flex; align-items: flex-start; gap: 5px; }
+  .center-address svg { flex-shrink: 0; margin-top: 2px; }
+  .info-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; margin-bottom: 18px; }
+  .info-cell { background: #f6f8f6; border-radius: 8px; padding: 10px 12px; }
+  .info-cell-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.7px; color: #888; margin-bottom: 3px; }
+  .info-cell-value { font-size: 13px; font-weight: 700; color: #003d1f; }
+  .info-cell-value.small { font-size: 11px; padding-top: 2px; }
+  .map-btn {
+    display: inline-flex; align-items: center; gap: 7px; text-decoration: none;
+    background: #f0f7f3; border: 1.5px solid #003d1f; color: #003d1f;
+    border-radius: 7px; padding: 9px 16px; font-size: 13px; font-weight: 600;
+    transition: background 0.2s;
+  }
+  .map-btn:hover { background: #dff0e6; }
+  .error-title { font-size: 15px; font-weight: 700; color: #c0392b; margin-bottom: 6px; }
+  .error-sub { font-size: 13px; color: #666; }
+
+  .footer-bar {
+    width: 100%; max-width: 640px; background: #e8ede9;
+    border-radius: 0 0 12px 12px; padding: 10px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .footer-text { font-size: 11px; color: #777; }
+  .footer-notice { font-size: 11px; color: #999; font-style: italic; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="bb-seal">🏦</div>
+    <div>
+      <div class="topbar-title">Bangladesh Bank</div>
+      <div class="topbar-subtitle">Bankers' Selection Committee Secretariat</div>
+    </div>
+  </div>
+  <div class="topbar-badge">BSCS Official</div>
+</div>
+
+<div class="card">
+  <div class="hero">
+    <h1>MCQ Examination Seat Finder</h1>
+    <p>Select your post and enter your roll number to find your exam center</p>
+  </div>
+
+  <!-- Exam selector -->
+  <div class="exam-tabs">
+    <button class="tab-btn active" onclick="selectExam('25101', this)">
+      Senior Officer (General)
+      <span class="tab-id">Job ID: 25101 &nbsp;·&nbsp; Grade-9 &nbsp;·&nbsp; Bangladesh Bank</span>
+    </button>
+    <button class="tab-btn" onclick="selectExam('25102', this)">
+      Officer (General)
+      <span class="tab-id">Job ID: 25102 &nbsp;·&nbsp; Grade-10 &nbsp;·&nbsp; 10 Banks + 1 FI</span>
+    </button>
+  </div>
+
+  <!-- Meta strip (dynamic) -->
+  <div class="meta-strip" id="metaStrip">
+    <div class="meta-item"><div class="meta-label">Exam Date</div><div class="meta-value" id="metaDate">15 May 2026</div></div>
+    <div class="meta-item"><div class="meta-label">Day</div><div class="meta-value" id="metaDay">Thursday</div></div>
+    <div class="meta-item"><div class="meta-label">Time</div><div class="meta-value" id="metaTime">10:00 – 11:00 AM</div></div>
+    <div class="meta-item"><div class="meta-label">Venues</div><div class="meta-value" id="metaVenues">36 Centers</div></div>
+  </div>
+
+  <div class="input-section">
+    <label for="roll">Roll Number</label>
+    <div class="input-row">
+      <input type="number" id="roll" placeholder="Enter your roll number">
+      <button class="btn" onclick="findSeat()">Search</button>
+    </div>
+  </div>
+
+  <div class="result" id="result">
+    <div class="result-card" id="resultCard">
+      <div class="result-header" id="resultHeader"><div class="result-dot"></div><span id="resultTitle"></span></div>
+      <div class="result-body" id="resultBody"></div>
+    </div>
+  </div>
+</div>
+
+<div class="footer-bar">
+  <span class="footer-text" id="footerNotice">Notice No. 173/2026 — Bangladesh Bank</span>
+  <span class="footer-notice">Verify at bangladeshbank.org.bd</span>
+</div>
+
+<script>
+const exams = {
+  '25101': {
+    date: '15 May 2026', day: 'Friday', time: '10:00 – 11:00 AM', venues: '36 Centers',
+    notice: 'Notice No. 173/2026 — Bangladesh Bank',
+    centers: [
+      { sl:1,  name:"Shamsul Hoque Khan School and College (School Campus)", address:"Paradogar, Matuail, Demra, Dhaka-1362", start:100001, end:111655 },
+      { sl:2,  name:"Shamsul Hoque Khan School and College (College Campus)", address:"Paradogar, Matuail, Demra, Dhaka-1362", start:111657, end:114575 },
+      { sl:3,  name:"A. K. School & College (Main Campus)", address:"Dania, Jatrabari, Dhaka-1236", start:114577, end:118450 },
+      { sl:4,  name:"A. K. School & College (New Campus)", address:"Dania, Jatrabari, Dhaka-1236", start:118451, end:120618 },
+      { sl:5,  name:"Barnamala Adarsha High School and College", address:"Dania, Jatrabari, Dhaka-1236", start:120619, end:124846 },
+      { sl:6,  name:"Dania College", address:"Dania, Jatrabari, Dhaka-1236", start:124847, end:132865 },
+      { sl:7,  name:"Dr. Mahbubur Rahman Molla College", address:"Matuail, Demra Road, Jatrabari, Dhaka-1362", start:132866, end:142567 },
+      { sl:8,  name:"Jatrabari Ideal School & College", address:"Jatrabari, Dhaka-1204", start:142569, end:146199 },
+      { sl:9,  name:"Ahmed Bawany Academy School & College", address:"3-5, K P Ghosh Street, Armanitola, Babubazar, Dhaka-1100", start:146200, end:151043 },
+      { sl:10, name:"Armanitola Government High School", address:"Armanitola, Dhaka-1100", start:151044, end:154089 },
+      { sl:11, name:"Fazlul Haque Mohila College", address:"12, Akashay Das Lane, Gandaria, Dhaka-1204", start:154090, end:157711 },
+      { sl:12, name:"Kabi Nazrul Govt. College", address:"1 No, Municipality Street, Dhaka", start:157712, end:161356 },
+      { sl:13, name:"Motijheel Model School and College (Motijheel Branch)", address:"Motijheel, Dhaka-1000", start:161357, end:168684 },
+      { sl:14, name:"Central Womens College", address:"13/2, Abhay Das Ln, Dhaka 1203", start:168686, end:171960 },
+      { sl:15, name:"Ali Ahmed School & College", address:"South Goran, Khilgaon, Dhaka-1219", start:171961, end:174998 },
+      { sl:16, name:"Khilgaon Govt. High School", address:"Khilgaon, Dhaka-1219", start:175000, end:178012 },
+      { sl:17, name:"Khilgaon Model College", address:"Block-C, 721/1, Khilgaon, Chowrasta, Dhaka 1219", start:178013, end:182203 },
+      { sl:18, name:"Sabujbagh Government College", address:"70/3 South Basabo (Near Balur Mat), Sabujbagh, Dhaka-1214", start:182204, end:185844 },
+      { sl:19, name:"Kadamtala Purba Basabo School & College", address:"Basabo, Dhaka-1214", start:185846, end:190179 },
+      { sl:20, name:"Mirpur Bangla School and College (Boys Section)", address:"Section 11, Pallabi, Dhaka-1216", start:190180, end:194397 },
+      { sl:21, name:"Mirpur Girls Ideal College", address:"Mirpur-10, Dhaka-1216", start:194398, end:198694 },
+      { sl:22, name:"Govt. Rupnagar Model School & College", address:"Road No-16, Rupnagar R/A Mirpur, Dhaka-1216", start:198695, end:201701 },
+      { sl:23, name:"Sher-E-Bangla Nagar Govt. Boys High School", address:"Sher-E-Bangla Nagar, Dhaka-1207", start:201702, end:205261 },
+      { sl:24, name:"Sher-E-Bangla Nagar Govt. Girls High School", address:"Sher-E-Bangla Nagar, Dhaka-1100", start:205262, end:208928 },
+      { sl:25, name:"Mogbazar Girls High School", address:"52, Siddheswari, Ramna, Dhaka-1217", start:208929, end:212330 },
+      { sl:26, name:"Siddheswari College", address:"25, Shahid Shangbadik Selina Parveen Sarak, Moghbazar, Dhaka-1217", start:212331, end:217182 },
+      { sl:27, name:"Siddheswari Girls' College", address:"148, New Baily Rd, Dhaka-1000", start:217183, end:221776 },
+      { sl:28, name:"Govt. Science College", address:"446, Tejgaon Shilpa Alaka, Dhaka-1208", start:221777, end:226047 },
+      { sl:29, name:"Tejgaon Adarsha School & College", address:"446 Bir Uttam Mir Shawkat Sarak, Dhaka 1208", start:226049, end:229685 },
+      { sl:30, name:"Dhanmondi Govt. Boys High School", address:"27 Mirpur Rd, Dhaka-1207", start:229686, end:233093 },
+      { sl:31, name:"Mohammadpur Kendriya College", address:"312/3, Noorjahan Road, Mohammadpur, Dhaka-1207", start:233094, end:237353 },
+      { sl:32, name:"Lalmatia Girls' High School & College", address:"9/15 Block # D, Lalmatia, Mohammadpur, Dhaka-1207", start:237354, end:240388 },
+      { sl:33, name:"Anandamoyee Girls' High School", address:"17/18 Kazimuddin Siddiqui Lane, Armanitola, Dhaka-1100", start:240389, end:243796 },
+      { sl:34, name:"Anwara Begum Muslim Girls High School And College", address:"13 Nazimuddin Road, Dhaka-1100", start:243797, end:246821 },
+      { sl:35, name:"Shaikh Borhanuddin Post Graduate College", address:"62, Nazimuddin Road, Dhaka-1100", start:246822, end:249877 },
+      { sl:36, name:"Azimpur Govt. Girls School & College", address:"Azimpur, Dhaka-1205", start:249879, end:254405 },
+    ]
+  },
+  '25102': {
+    date: '16 May 2026', day: 'Saturday', time: '3:00 – 4:00 PM', venues: '44 Centers',
+    notice: 'Notice No. 174/2026 — BSCS (10 Banks + 1 FI)',
+    centers: [
+      { sl:1,  name:"Banani Model School", address:"Plot No # 13, Road No.-05, Block # F, Banani, Dhaka 1", start:300001, end:302569 },
+      { sl:2,  name:"Green field School & College", address:"Plot-3, Block-C, Avenue-2, Mirpur-10, Dhaka 1216", start:302570, end:304827 },
+      { sl:3,  name:"Sher-E-Bangla Nagar Govt. Girls' High School", address:"Sher-E-Bangla Nagar, Dhaka-1207", start:304828, end:308582 },
+      { sl:4,  name:"Faridabad High School", address:"15, Haricharan Roy Road, Faridabad, Shyampur, Dhaka 1204", start:308583, end:311611 },
+      { sl:5,  name:"Dhaka Cotton Mill Adarsha High School", address:"Posthakhowla, Dhaka 1204", start:311612, end:314261 },
+      { sl:6,  name:"Kishori Lal Jubilee School & College", address:"39, North Brook Hall Road, Banglabazar, Dhaka 1100", start:314262, end:316779 },
+      { sl:7,  name:"Dhaka Mohanagar Mohila College", address:"6 No. Subhash Bose Avenue, Laxmi Bazar, Sutrapur, Dhaka-1100", start:316780, end:321181 },
+      { sl:8,  name:"Madertek Abdul Aziz School & College", address:"Bashabo, Sabujbagh, Dhaka 1214", start:321182, end:324928 },
+      { sl:9,  name:"Sabujbagh Government College", address:"70/3, South Basabo, Sabujbagh, Dhaka 1214", start:324929, end:329876 },
+      { sl:10, name:"Ali Ahmed School & College", address:"Goran, Khilgaon, Dhaka 1219", start:329877, end:333594 },
+      { sl:11, name:"Kadamtala Purba Basabo School & College", address:"28/3, Kadamtala, Basabo, Dhaka 1214", start:333595, end:338363 },
+      { sl:12, name:"Khilgaon Model College", address:"Block-C, 721/1, Khilgaon Chowrashta, Dhaka 1219", start:338365, end:343941 },
+      { sl:13, name:"Khilgaon Govt. Colony School & College", address:"560/C, Khilgaon, Dhaka 1219", start:343942, end:347351 },
+      { sl:14, name:"Khilgaon School and College", address:"711/C, Khilgaon, Dhaka 1219", start:347352, end:352362 },
+      { sl:15, name:"Kamalapur Sher-E-Bangla Railway School & College", address:"Kamalapur, Dhaka 1217", start:352363, end:354999 },
+      { sl:16, name:"Motijheel Colony High School", address:"Motijheel, Dhaka", start:355000, end:358754 },
+      { sl:17, name:"Demra College", address:"Demra, Dhaka 1360", start:358755, end:362505 },
+      { sl:18, name:"Bamoil Ideal High School and College", address:"Bamoil, Demra, Dhaka 1361", start:362506, end:364455 },
+      { sl:19, name:"Bawany School & College", address:"27, Kamargop, Demra, Dhaka 1360", start:364456, end:370040 },
+      { sl:20, name:"Matuail Haji Abdul Latif Bhuiyan College", address:"Matuail Dakkhin Para, College Road, Demra, Jatrabari, Dhaka", start:370041, end:372309 },
+      { sl:21, name:"Shekhdi Abdullah Mollah High School", address:"Shekhdi, Jatrabari, Dhaka 1362", start:372310, end:375155 },
+      { sl:22, name:"Barnamala Adarsha School And College", address:"Dania, Jatrabari, Dhaka-1236", start:375156, end:379525 },
+      { sl:23, name:"Jatrabari Ideal School & College", address:"Jatrabari, Dhaka 1232", start:379528, end:383218 },
+      { sl:24, name:"A. K. High School & College (Main Campus)", address:"Dania, Dhaka-1236", start:383219, end:387156 },
+      { sl:25, name:"A.K. High School & College (New Campus)", address:"Dania, Dhaka-1236", start:387158, end:389406 },
+      { sl:26, name:"City Corporation Adarsha High School", address:"3/4, Dhalpur, Wari, Dhaka 1203", start:389407, end:392100 },
+      { sl:27, name:"Ahmed Bawany Academy School & College", address:"3,4,5, K.P. Ghosh Street, Armanitola, Babubazar, Dhaka-1100", start:392101, end:397070 },
+      { sl:28, name:"Armanitola Govt. High School, Dhaka", address:"1 No Abul Khayrath Road, Dhaka 1100", start:397071, end:400524 },
+      { sl:29, name:"Anandamoyee Girls' High School", address:"17/18 Kazimuddin Siddiki Lane, Armanitola, Dhaka-1100", start:400525, end:404033 },
+      { sl:30, name:"Central Women's College", address:"13/2, Abhay Das Lane, Tikatuli, Dhaka 1203", start:404034, end:407382 },
+      { sl:31, name:"Abudharr Ghifari College", address:"Malibag, Dhaka 1217", start:407383, end:411115 },
+      { sl:32, name:"BTCL Ideal School", address:"Moghbazar, Dhaka 1217", start:411116, end:414893 },
+      { sl:33, name:"Maghbazar Girls' High School", address:"52, Siddirswari, Ramna, Dhaka 1217", start:414896, end:418619 },
+      { sl:34, name:"Siddheswari College", address:"25, Shahid Shangbadik Selina Parveen Sarak, Moghbazar, Dhaka-1217", start:418620, end:423594 },
+      { sl:35, name:"Mohammadpur Girls' High School", address:"Noorjahan Road, Mohammadpur, Dhaka 1207", start:423595, end:426699 },
+      { sl:36, name:"Shantibag High School", address:"48, Shantibag, Dhaka 1217", start:426700, end:429797 },
+      { sl:37, name:"Tejgaon Model High School", address:"Tejkonipara, Tejgaon, Dhaka 1215", start:429798, end:433522 },
+      { sl:38, name:"Tejgaon Adarsha School & College", address:"446, Tejgaon I/A, Dhaka-1208", start:433524, end:437281 },
+      { sl:39, name:"Kakoli High School & College", address:"179 Sat Masjid Road, Dhanmondi, Dhaka 1209", start:437282, end:440123 },
+      { sl:40, name:"Dhanmondi Govt. Girl's High School", address:"11/A, Dhanmondi Residential Area, Dhaka 1209", start:440124, end:443231 },
+      { sl:41, name:"Dhanmondi Govt. Boys High School", address:"3, Sobhanbag, Mirpur Road, Dhaka 1207", start:443232, end:446755 },
+      { sl:42, name:"Begum Rahima Adarsha Balika Uchcha Bidyalaya", address:"27/4-A, Topkhana Road, Shegunbagicha, Dhaka 1000", start:446756, end:449265 },
+      { sl:43, name:"Anwara Begum Muslim Girl's High School & College", address:"13 Nazimuddin Road, Dhaka 1100", start:449266, end:452346 },
+      { sl:44, name:"Rayhan School and College", address:"37/6-A, Azimpur, Dhaka", start:452347, end:453263 },
+    ]
+  }
+};
+
+let activeExam = '25101';
+
+function selectExam(id, btn) {
+  activeExam = id;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const ex = exams[id];
+  document.getElementById('metaDate').textContent = ex.date;
+  document.getElementById('metaDay').textContent = ex.day;
+  document.getElementById('metaTime').textContent = ex.time;
+  document.getElementById('metaVenues').textContent = ex.venues;
+  document.getElementById('footerNotice').textContent = ex.notice;
+  document.getElementById('roll').value = '';
+  document.getElementById('result').style.display = 'none';
+}
+
+function findSeat() {
+  const roll = parseInt(document.getElementById('roll').value);
+  const resultDiv = document.getElementById('result');
+  const card = document.getElementById('resultCard');
+  const header = document.getElementById('resultHeader');
+  const title = document.getElementById('resultTitle');
+  const body = document.getElementById('resultBody');
+
+  resultDiv.style.display = 'block';
+  resultDiv.style.animation = 'none';
+  void resultDiv.offsetWidth;
+  resultDiv.style.animation = '';
+
+  if (!roll || isNaN(roll)) {
+    card.className = 'result-card not-found';
+    header.className = 'result-header not-found';
+    title.textContent = 'Invalid Input';
+    body.innerHTML = '<p class="error-title">Please enter a valid roll number.</p><p class="error-sub">Ensure you have selected the correct exam post above.</p>';
+    return;
+  }
+
+  const centers = exams[activeExam].centers;
+  const center = centers.find(c => roll >= c.start && roll <= c.end);
+
+  if (center) {
+    const mapQuery = encodeURIComponent(center.name + ', ' + center.address);
+    card.className = 'result-card found';
+    header.className = 'result-header found';
+    title.textContent = 'Examination Center Confirmed';
+    body.innerHTML = `
+      <div class="center-name">${center.name}</div>
+      <div class="center-address">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+        </svg>
+        ${center.address}
+      </div>
+      <div class="info-grid">
+        <div class="info-cell">
+          <div class="info-cell-label">Roll No.</div>
+          <div class="info-cell-value">${roll}</div>
+        </div>
+        <div class="info-cell">
+          <div class="info-cell-label">Center No.</div>
+          <div class="info-cell-value">${String(center.sl).padStart(2,'0')}</div>
+        </div>
+        <div class="info-cell">
+          <div class="info-cell-label">Exam Date</div>
+          <div class="info-cell-value small">${exams[activeExam].date}</div>
+        </div>
+        <div class="info-cell">
+          <div class="info-cell-label">Roll Range</div>
+          <div class="info-cell-value small">${center.start}–${center.end}</div>
+        </div>
+      </div>
+      <a class="map-btn" href="https://www.google.com/maps/search/?api=1&query=${mapQuery}" target="_blank">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+        </svg>
+        View on Google Maps
+      </a>
+    `;
+  } else {
+    card.className = 'result-card not-found';
+    header.className = 'result-header not-found';
+    title.textContent = 'Roll Number Not Found';
+    body.innerHTML = `
+      <p class="error-title">No center found for roll number ${roll}.</p>
+      <p class="error-sub">Please verify your roll number from your admit card, or ensure you have selected the correct exam post (Job ID: ${activeExam}).</p>
+    `;
+  }
+}
+
+document.getElementById('roll').addEventListener('keydown', e => { if (e.key === 'Enter') findSeat(); });
+</script>
+</body>
+</html>
