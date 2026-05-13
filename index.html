@@ -134,6 +134,23 @@
   }
   .footer-text { font-size: 11px; color: #777; }
   .footer-notice { font-size: 11px; color: #999; font-style: italic; }
+
+  @media (max-width: 480px) {
+    body { padding: 0; align-items: flex-start; }
+    .topbar { border-radius: 0; }
+    .card { padding: 22px 18px 20px; box-shadow: none; }
+    .footer-bar { border-radius: 0; flex-direction: column; gap: 4px; text-align: center; }
+    .exam-tabs { flex-direction: column; gap: 8px; }
+    .tab-btn { width: 100%; }
+    .input-row { flex-direction: column; gap: 8px; }
+    .input-row .btn { width: 100%; }
+    .info-grid { grid-template-columns: repeat(2, 1fr); }
+    .meta-strip { flex-wrap: wrap; }
+    .meta-item { flex: 0 0 50%; border-bottom: 1px solid #e0e0e0; }
+    .meta-item:nth-child(2) { border-right: none; }
+    .meta-item:nth-child(3), .meta-item:nth-child(4) { border-bottom: none; }
+    .meta-item:nth-child(4) { border-right: none; }
+  }
 </style>
 </head>
 <body>
@@ -170,7 +187,7 @@
   <!-- Meta strip (dynamic) -->
   <div class="meta-strip" id="metaStrip">
     <div class="meta-item"><div class="meta-label">Exam Date</div><div class="meta-value" id="metaDate">15 May 2026</div></div>
-    <div class="meta-item"><div class="meta-label">Day</div><div class="meta-value" id="metaDay">Thursday</div></div>
+    <div class="meta-item"><div class="meta-label">Day</div><div class="meta-value" id="metaDay">Friday</div></div>
     <div class="meta-item"><div class="meta-label">Time</div><div class="meta-value" id="metaTime">10:00 – 11:00 AM</div></div>
     <div class="meta-item"><div class="meta-label">Venues</div><div class="meta-value" id="metaVenues">36 Centers</div></div>
   </div>
@@ -382,6 +399,16 @@ function findSeat() {
 }
 
 document.getElementById('roll').addEventListener('keydown', e => { if (e.key === 'Enter') findSeat(); });
+
+// Initialize meta strip from JS data (prevents hardcoded HTML mismatch)
+(function() {
+  const ex = exams[activeExam];
+  document.getElementById('metaDate').textContent = ex.date;
+  document.getElementById('metaDay').textContent = ex.day;
+  document.getElementById('metaTime').textContent = ex.time;
+  document.getElementById('metaVenues').textContent = ex.venues;
+  document.getElementById('footerNotice').textContent = ex.notice;
+})();
 </script>
 </body>
 </html>
